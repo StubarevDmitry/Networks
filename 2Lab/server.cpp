@@ -1,5 +1,5 @@
 #include "server.hpp"
-#include "speedtest.hpp"
+#include "speedWriter.hpp"
 
 
 
@@ -10,21 +10,21 @@ bool fileExists(std::string filename) {
     return file.good();
 }
 
-std::string read_until_minus(tcp::socket& socket) {
+std::string readUntilMinus(tcp::socket& socket) {
     std::string received_data;
     char c;
 
     while (true) {
-        // Считываем один байт из сокета
+        // РЎС‡РёС‚С‹РІР°РµРј РѕРґРёРЅ Р±Р°Р№С‚ РёР· СЃРѕРєРµС‚Р°
         boost::system::error_code error;
         size_t bytes_read = socket.read_some(boost::asio::buffer(&c, 1), error);
 
         if (error) {
             std::cerr << "Error reading from socket: " << error.message() << std::endl;
-            return " "; // возвращаем " "
+            return " "; // РІРѕР·РІСЂР°С‰Р°РµРј " "
         }
 
-        // Добавляем считанный символ в строку
+        // Р”РѕР±Р°РІР»СЏРµРј СЃС‡РёС‚Р°РЅРЅС‹Р№ СЃРёРјРІРѕР» РІ СЃС‚СЂРѕРєСѓ
         received_data += c;
 
         if (c == '-') {
@@ -39,15 +39,15 @@ std::string getUniqueFileName(std::string baseName) {
     std::string newName = baseName;
     int copyNumber = 1;
 
-    // Проверяем, существует ли файл, если да - генерируем новое имя
+    // РџСЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С„Р°Р№Р», РµСЃР»Рё РґР° - РіРµРЅРµСЂРёСЂСѓРµРј РЅРѕРІРѕРµ РёРјСЏ
     while (std::filesystem::exists("uploads\\" + newName)) {
         
-        // Извлекаем имя файла и его расширение
+        // РР·РІР»РµРєР°РµРј РёРјСЏ С„Р°Р№Р»Р° Рё РµРіРѕ СЂР°СЃС€РёСЂРµРЅРёРµ
         std::string::size_type dotPos = baseName.find_last_of('.');
         std::string nameWithoutExt = (dotPos == std::string::npos) ? baseName : baseName.substr(0, dotPos);
         std::string extension = (dotPos == std::string::npos) ? "" : baseName.substr(dotPos);
 
-        // Генерируем имя нового файла
+        // Р“РµРЅРµСЂРёСЂСѓРµРј РёРјСЏ РЅРѕРІРѕРіРѕ С„Р°Р№Р»Р°
         newName = nameWithoutExt + "(" + std::to_string(copyNumber) + ")" + extension;
         copyNumber++;
     }
@@ -56,11 +56,11 @@ std::string getUniqueFileName(std::string baseName) {
 }
 
 std::vector<std::string> split(const std::string& str, char delimiter) {
-    std::vector<std::string> tokens; // Вектор для сохранения слов
+    std::vector<std::string> tokens; // Р’РµРєС‚РѕСЂ РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ СЃР»РѕРІ
 
-    std::string token; // Переменная для хранения текущего слова
+    std::string token; // РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ С‚РµРєСѓС‰РµРіРѕ СЃР»РѕРІР°
 
-    std::istringstream tokenStream(str); // Использование stringstream для обработки строки
+    std::istringstream tokenStream(str); // РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ stringstream РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё СЃС‚СЂРѕРєРё
 
     while (std::getline(tokenStream, token, delimiter)) {
         if (!token.empty()) { 
@@ -78,17 +78,15 @@ void Session::start() {
 
 void Session::readFileNameAndSize() {
 
-    std::string file_metadata = read_until_minus(socket_);
+    std::string file_metadata = readUntilMinus(socket_);
 
     file_metadata.pop_back();
 
     std::vector<std::string> words = split(file_metadata, ' ');
 
-    std::cout << "Прочитал имя файла: " << words[1] << std::endl;
     fileName = words[1];
 
     fileSize = std::atoi(words[0].data());
-    std::cout << "Прочитал размер файла: " << fileSize << std::endl;
     
     readFile();
 }
@@ -98,14 +96,13 @@ void Session::readFile() {
 
     std::ofstream ofs(uploads + getUniqueFileName(fileName), std::ios::binary);
 
-    SpeedTest test;
+    SpeedWriter test;
     test.timerRun();
     std::size_t total_read = 0;
 
     while (total_read != fileSize) {
         std::size_t lengthToRead = socket_.read_some(boost::asio::buffer(data, size_t(bufferSize)));
 
-        //запись
         ofs.write(data, lengthToRead);
 
         total_read += lengthToRead;
@@ -118,11 +115,11 @@ void Session::readFile() {
     test.writeSpeedAndUpdateTime();
 
     if (!ofs) {
-        std::cout << "не удачно с копировано " << std::endl;
-        doWrite("ERROR");
+    std::cout << "РЅРµ СѓРґР°С‡РЅРѕ СЃ РєРѕРїРёСЂРѕРІР°РЅРѕ " << std::endl;
+    doWrite("ERROR");
     }
     else {
-        std::cout << "Удачно с копировано " << std::endl;
+        std::cout << "РЈРґР°С‡РЅРѕ СЃ РєРѕРїРёСЂРѕРІР°РЅРѕ " << std::endl;
         doWrite("all good");
     }
 
@@ -141,16 +138,16 @@ void Server::doAccept() {
     acceptor.async_accept(
         [this](boost::system::error_code ec, tcp::socket socket) {
             if (!ec) {
-                // Создаем новую сессию
+                // РЎРѕР·РґР°РµРј РЅРѕРІСѓСЋ СЃРµСЃСЃРёСЋ
                 auto session = std::make_shared<Session>(std::move(socket));
 
-                // Запуск новой сессии
+                // Р—Р°РїСѓСЃРє РЅРѕРІРѕР№ СЃРµСЃСЃРёРё
                 std::thread([session]() {
                     session->start();
                 }).detach();
             }
 
-            // принять ещё одну сесию
+            // РїСЂРёРЅСЏС‚СЊ РµС‰С‘ РѕРґРЅСѓ СЃРµСЃРёСЋ
             doAccept();
         });
 }

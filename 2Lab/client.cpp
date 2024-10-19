@@ -19,7 +19,7 @@ Client::Client(const std::string& host, const std::string& service)
 
 void Client::start() {
     std::string message;
-    std::cout << "Ââåäèòå èìÿ ôàéëà (èëè 'exit' äëÿ âûõîäà): ";
+    std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¸Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð° (Ð¸Ð»Ð¸ 'exit' Ð´Ð»Ñ Ð²Ñ‹Ñ…Ð¾Ð´Ð°): ";
     std::cin >> message;
     writeFile(message);
 }
@@ -29,19 +29,19 @@ void Client::writeFile(const std::string filename) {
     std::ifstream file(filename, std::ios::binary);
 
     if (!file) {
-        std::cerr << "Íå óäàåòñÿ îòêðûòü ôàéë." << std::endl;
+        std::cerr << "ÐÐµ ÑƒÐ´Ð°ÐµÑ‚ÑÑ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚ÑŒ Ñ„Ð°Ð¹Ð»." << std::endl;
         return ;
     }
 
-    // Îòïðàâëÿåì ðàçìåð ôàéëà
+    // ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð»ÑÐµÐ¼ Ñ€Ð°Ð·Ð¼ÐµÑ€ Ñ„Ð°Ð¹Ð»Ð°
     file.seekg(0, std::ios::end);
     std::size_t filesize = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    // Îòïðàâëÿåì èìÿ ôàéëà è ðàçìåð ôàéëà
+    // ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð»ÑÐµÐ¼ Ð¸Ð¼Ñ Ñ„Ð°Ð¹Ð»Ð° Ð¸ Ñ€Ð°Ð·Ð¼ÐµÑ€ Ñ„Ð°Ð¹Ð»Ð°
     boost::asio::write(socket_, boost::asio::buffer(std::to_string(filesize) + " " + getFileName(filename) + "-"));
 
-    // Îòïðàâëÿåì ñîäåðæèìîå ôàéëà
+    // ÐžÑ‚Ð¿Ñ€Ð°Ð²Ð»ÑÐµÐ¼ ÑÐ¾Ð´ÐµÑ€Ð¶Ð¸Ð¼Ð¾Ðµ Ñ„Ð°Ð¹Ð»Ð°
     char buffer[bufferSize];
 
     while (!file.eof()) {
@@ -51,7 +51,7 @@ void Client::writeFile(const std::string filename) {
     }
 
     if (check()) {
-        std::cout << "Óäà÷íî ñ êîïèðîâàí" << std::endl;
+        std::cout << "Ð£Ð´Ð°Ñ‡Ð½Ð¾ Ñ ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½" << std::endl;
     }
 
     file.close();

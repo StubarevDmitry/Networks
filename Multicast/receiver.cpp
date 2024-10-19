@@ -2,9 +2,7 @@
 
 
 
-
-
-receiver::receiver(boost::asio::io_context& io_context,
+Receiver::Receiver(boost::asio::io_context& io_context,
     const boost::asio::ip::address& listen_address,
     const boost::asio::ip::address& multicast_address, TemporaryStorage* ts): socket_(io_context), ts(ts){
     // Create the socket so that multiple may be bound to the same address.
@@ -16,10 +14,10 @@ receiver::receiver(boost::asio::io_context& io_context,
     // Join the multicast group.
     socket_.set_option(boost::asio::ip::multicast::join_group(multicast_address));
 
-    do_receive();
+    doReceive();
 }
 
-void receiver::do_receive()
+void Receiver::doReceive()
 {
     socket_.async_receive_from(
         boost::asio::buffer(data), senderEndpoint_,
@@ -28,7 +26,7 @@ void receiver::do_receive()
             if (!ec)
             {
                 ts->putInStorage(senderEndpoint_.address().to_string(), senderEndpoint_.port());
-                do_receive();
+                doReceive();
             }
         });
 }

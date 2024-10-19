@@ -3,10 +3,10 @@
 #include <string>
 #include <boost/asio.hpp>
 
-class sender
+class Sender
 {
 public:
-    sender(boost::asio::io_context& io_context,
+    Sender(boost::asio::io_context& io_context,
         const boost::asio::ip::address& multicast_address);
 
 private:

@@ -6,7 +6,7 @@
 
 constexpr short multicast_port = 30001;
 
-sender :: sender(boost::asio::io_context& io_context,
+Sender :: Sender(boost::asio::io_context& io_context,
     const boost::asio::ip::address& multicast_address)
     : endpoint_(multicast_address, multicast_port),
     socket_(io_context, endpoint_.protocol()),
@@ -16,7 +16,7 @@ sender :: sender(boost::asio::io_context& io_context,
     doSend();
 }
 
-void sender :: doSend()
+void Sender :: doSend()
 {
     messageCount++;
     socket_.async_send_to(
@@ -28,7 +28,7 @@ void sender :: doSend()
         });
 }
 
-void sender::doTimeout()
+void Sender::doTimeout()
 {
     timer_.expires_after(std::chrono::seconds(1));
     timer_.async_wait(

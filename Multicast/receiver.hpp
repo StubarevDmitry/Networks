@@ -5,15 +5,15 @@
 #include "boost/asio.hpp"
 
 
-class receiver
+class Receiver
 {
 public:
-    receiver(boost::asio::io_context& io_context,
+    Receiver(boost::asio::io_context& io_context,
         const boost::asio::ip::address& listen_address,
         const boost::asio::ip::address& multicast_address, TemporaryStorage* ts);
 
 private:
-    void do_receive();
+    void doReceive();
 
     boost::asio::ip::udp::socket socket_;
     boost::asio::ip::udp::endpoint senderEndpoint_;

@@ -11,7 +11,7 @@ struct Key {
 	std::string address;
 	int port;
 
-	// Оператор сравнения для использования в std::map
+	// РћРїРµСЂР°С‚РѕСЂ СЃСЂР°РІРЅРµРЅРёСЏ РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ std::map
 	bool operator<(const Key& other) const {
 		return std::tie(address, port) < std::tie(other.address, other.port);
 	}

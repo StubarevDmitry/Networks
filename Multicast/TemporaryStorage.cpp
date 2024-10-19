@@ -9,11 +9,11 @@ void TemporaryStorage::run() {
 		for (auto it = storage.begin(); it != storage.end(); ) {
 			it->second -= 5;
 			if (it->second < 0) {
-				it = storage.erase(it); // Удаляем элемент и обновляем итератор
+				it = storage.erase(it); // РЈРґР°Р»СЏРµРј СЌР»РµРјРµРЅС‚ Рё РѕР±РЅРѕРІР»СЏРµРј РёС‚РµСЂР°С‚РѕСЂ
 				isPrintable = true;
 			}
 			else {
-				++it; // Переходим к следующему элементу
+				++it;
 			}
 		}
 		g_lock.unlock();
