@@ -16,10 +16,10 @@ double SpeedWriter::getTime() {
 }
 
 void SpeedWriter::writeSpeedAndUpdateTime() {
-	std::cout << "мегабайт в секунду : " << (double)bytes / getTime() / (double)(1024 * 1024) << std::endl;
+	std::cout << "мегабайт в секунду : " << (double)bytes / getTime() * toMB << std::endl;
 	fullTime += seconds;
 	fullBytes += bytes;
-	std::cout << "мегабайт в секунду ср: " << (double)fullBytes / fullTime / (double)(1024 * 1024) << std::endl;
+	std::cout << "мегабайт в секунду ср: " << (double)fullBytes / fullTime * toMB << std::endl;
 	bytes = 0;
 	timerRun();
 }
