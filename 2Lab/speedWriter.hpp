@@ -25,5 +25,7 @@ private:
 
 	int count = 0;
 
+	double toMB = 1. / (double)(1024 * 1024);
+
 	time_t  startTime, endTime;
 };
