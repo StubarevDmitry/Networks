@@ -17,8 +17,6 @@ struct Key {
 	}
 };
 
-using doubleKeyMap = std::map<Key, int>;
-
 class TemporaryStorage
 {
 
@@ -29,5 +27,5 @@ public:
 
 private:
 	std::mutex g_lock;
-	doubleKeyMap storage;
+	std::map<Key, int> storage;
 };

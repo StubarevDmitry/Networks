@@ -19,7 +19,7 @@ Client::Client(const std::string& host, const std::string& service)
 
 void Client::start() {
     std::string message;
-    std::cout << "Введите имя файла ";
+    std::cout << "Введите имя файла: ";
     std::cin >> message;
     writeFile(message);
 }
