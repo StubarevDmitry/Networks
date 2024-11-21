@@ -1,0 +1,4 @@
+C:\Users\stuba\source\repos\NetworkLab3\NetworkLab3\x64\Debug\NetworkLab3.vcxproj.AssemblyReference.cache
+C:\Users\stuba\source\repos\NetworkLab3\NetworkLab3\x64\Debug\NetworkLab3.MainForm.resources
+C:\Users\stuba\source\repos\NetworkLab3\NetworkLab3\x64\Debug\NetworkLab3.vcxproj.GenerateResource.cache
+C:\Users\stuba\source\repos\NetworkLab3\NetworkLab3\x64\Debug\NetworkLab3.vcxproj.CopyComplete
