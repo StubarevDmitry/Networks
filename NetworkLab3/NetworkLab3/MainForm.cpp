@@ -1,7 +1,7 @@
-#include "MainForm.h"
+#include "Form.h"
+#include "PlacesAPI.hpp"
 #include <iostream>
 #include <locale>
-#include "Places.hpp"
 
 using namespace System;
 using namespace System::Windows::Forms;
@@ -14,10 +14,10 @@ int main(array<String^>^) {
 		{"location", "dc9c35dd-f63c-463f-83c0-e94291899e56"}
 	};
 
-	Places places(apiKeys);
+	PlacesAPI places(apiKeys);
 
-	Application::SetCompatibleTextRenderingDefault(false);
 	Application::EnableVisualStyles();
+	Application::SetCompatibleTextRenderingDefault(false);
 	NetworkLab3::MainForm form(places);
 	Application::Run(% form);
 

@@ -1,12 +1,21 @@
-#include "Places.hpp"
+#include "PlacesAPI.hpp"
 #include "Utils.hpp"
 #include <algorithm>
+#include <curl/curl.h>
+#include "./include/json.hpp"
 #include <codecvt>
+#include <future>
+#include <iostream>
+#include <string>
+#include <locale>
+#include <iomanip>
+#include <sstream>
 
-Places::Places(const std::map<std::string, std::string>& apiKeys) : apiKeys(apiKeys) {}
+PlacesAPI::PlacesAPI(const std::map<std::string, std::string>& apiKeys) : apiKeys(apiKeys) {}
 
-std::string Places::getWeather(int placeID) {
-    std::string reqStr = "https://api.openweathermap.org/data/2.5/weather?lat=" + std::to_string(coords[placeID].second)
+std::string PlacesAPI::getWeather(int placeID) {
+    std::string reqStr = "https://api.openweathermap.org/data/2.5/weather?lat="
+        + std::to_string(coords[placeID].second)
         + "&lon=" + std::to_string(coords[placeID].first) + "&appid=" + apiKeys["weather"];
     json jsonObject = Utils::getJson(reqStr);
 
@@ -14,14 +23,18 @@ std::string Places::getWeather(int placeID) {
     int feelsLike = jsonObject["main"]["feels_like"].get<int>() - 273;
     int maxTemp = jsonObject["main"]["temp_max"].get<int>() - 273;
     int minTemp = jsonObject["main"]["temp_min"].get<int>() - 273;
+    std::string weather = jsonObject["weather"][0]["description"].get<std::string>();
+    int speed = jsonObject["wind"]["speed"].get<int>();
 
-    return "temp: " + std::to_string(temp) + "C\n" +
-        "feelsLike: " + std::to_string(feelsLike) + "C\n" +
-        "maxTemp: " + std::to_string(maxTemp) + "C\n" +
-        "minTemp: " + std::to_string(minTemp) + "C\n";
+    return "temperature: " + std::to_string(temp) + " degrees Celsius\n" +
+        "feels Like: " + std::to_string(feelsLike) + " degrees Celsius\n" +
+        "maximum temperature: " + std::to_string(maxTemp) + " degrees Celsius\n" +
+        "minimum temperature: " + std::to_string(minTemp) + " degrees Celsius\n" +
+        "weather: " + weather + "\n" +
+        "wind speed: " + std::to_string(speed) + "\n";
 }
 
-std::vector<std::wstring> Places::placesInArea(int placeID) {
+std::vector<std::wstring> PlacesAPI::placesInArea(int placeID) {
     std::vector<std::wstring> placesAndDescription;
     std::string api_key = apiKeys["placesArea"];
 
@@ -42,34 +55,51 @@ std::vector<std::wstring> Places::placesInArea(int placeID) {
         "&lat_max=" + lat_max + "&kinds=interesting_places&format=geojson&apikey=" + api_key;
 
     json jsonObject = Utils::getJson(url);
+
     json jsonArray = jsonObject["features"];
+
     int places = std::min<size_t>(jsonArray.size(), MAX_PLACES_COUNT);
+
+    std::vector<std::future<std::wstring>> futures;
+
     for (int i = 0; i < places; i++) {
         json elementObj = jsonArray[i];
         std::string name = elementObj["properties"]["name"].get<std::string>();
         std::string xid = elementObj["properties"]["xid"].get<std::string>();
-        std::string description = placeDescription(xid);
-        if (name.empty() || description.empty()) {
-            continue;
-        }
 
-        // Преобразование строк из UTF-8 в UTF-16
-        int nameLen = MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, NULL, 0);
-        std::wstring wname(nameLen, 0);
-        MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, &wname[0], nameLen);
+        futures.push_back(std::async(std::launch::async, [name, xid, this]() -> std::wstring {
+            std::string description = placeDescription(xid);
+            if (name.empty() || description.empty()) {
+                return L"";
+            }
 
-        int descLen = MultiByteToWideChar(CP_UTF8, 0, description.c_str(), -1, NULL, 0);
-        std::wstring wdescription(descLen, 0);
-        MultiByteToWideChar(CP_UTF8, 0, description.c_str(), -1, &wdescription[0], descLen);
+            // Преобразование строк из UTF-8 в UTF-16 
+            int nameLen = MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, NULL, 0);
+            std::wstring wname(nameLen, 0);
+            MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, &wname[0], nameLen);
 
-        placesAndDescription.push_back(L"Название: " + wname + L"\n" + L"\n" +
-            L"Описание: " + wdescription + L"\n" +
-            L"---------------------------------------------------------------------------" + L"\n");
+            int descLen = MultiByteToWideChar(CP_UTF8, 0, description.c_str(), -1, NULL, 0);
+            std::wstring wdescription(descLen, 0);
+            MultiByteToWideChar(CP_UTF8, 0, description.c_str(), -1, &wdescription[0], descLen);
+
+            return L"Название: " + wname + L"\n" + L"\n" +
+                L"Описание: " + wdescription + L"\n" +
+                L"---------------------------------------------------------------------------" + L"\n";
+            }));
     }
+
+    // соберает все асинхронные задачи (:
+    for (auto& future : futures) {
+        std::wstring result = future.get();
+        if (!result.empty()) {
+            placesAndDescription.push_back(result);
+        }
+    }
+
     return placesAndDescription;
 }
 
-std::string Places::placeDescription(const std::string& xid) {
+std::string PlacesAPI::placeDescription(const std::string& xid) {
     std::string api_key = apiKeys["placesArea"];
     std::string url = "http://api.opentripmap.com/0.1/ru/places/xid/" + xid + "?apikey=" + api_key;
     json jsonObject = Utils::getJson(url);
@@ -83,11 +113,38 @@ std::string Places::placeDescription(const std::string& xid) {
     return description;
 }
 
-std::vector<std::wstring> Places::getPlaces(const std::string& place) {
-    std::vector<std::wstring> places;
-    std::string url = "https://graphhopper.com/api/1/geocode?q=" + place + "&locale=ru&limit=100&key=" + apiKeys["location"];
+std::string replaceSpaces(const std::string& str) {
+    std::string result;
+    for (char ch : str) {
+        if (ch == ' ') {
+            result += "%20";
+        }
+        else {
+            result += ch;
+        }
+    }
+    return result;
+}
 
+std::string to_utf8(const std::wstring& str)
+{
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> u8;
+    return u8.to_bytes(str);
+}
+
+std::vector<std::wstring> PlacesAPI::getPlaces(const std::wstring& place) {
+
+    std::string urlPlaceName = to_utf8(place);
+
+    std::string placeWithoutSpace = replaceSpaces(urlPlaceName);
+
+    std::string url = "https://graphhopper.com/api/1/geocode?q=" + placeWithoutSpace
+        + "&locale=ru&limit=100&key=" + apiKeys["location"];
+
+    std::vector<std::wstring> places;
+    
     json jsonObject = Utils::getJson(url);
+
     json jsonArray = jsonObject["hits"];
     int count = 1;
     for (const auto& element : jsonArray) {
@@ -113,14 +170,14 @@ std::vector<std::wstring> Places::getPlaces(const std::string& place) {
             int stateLen = MultiByteToWideChar(CP_UTF8, 0, state.c_str(), -1, NULL, 0);
             std::wstring wstate(stateLen, 0);
             MultiByteToWideChar(CP_UTF8, 0, state.c_str(), -1, &wstate[0], stateLen);
-            variotive += L", Штат: " + wstate;
+            variotive += L", Субъект: " + wstate;
         }
 
         if (osmValue != "") {
             int osmValueLen = MultiByteToWideChar(CP_UTF8, 0, osmValue.c_str(), -1, NULL, 0);
             std::wstring wosmValue(osmValueLen, 0);
             MultiByteToWideChar(CP_UTF8, 0, osmValue.c_str(), -1, &wosmValue[0], osmValueLen);
-            variotive += L", OSM Value: " + wosmValue;
+            variotive += L", Тип объекта: " + wosmValue;
         }
 
         if (street != "") {
@@ -139,7 +196,8 @@ std::vector<std::wstring> Places::getPlaces(const std::string& place) {
         std::wstring wname(nameLen, 0);
         MultiByteToWideChar(CP_UTF8, 0, name.c_str(), -1, &wname[0], nameLen);
 
-        places.push_back(std::to_wstring(count) + L") Страна: " + wcountry + L", Название: " + wname + variotive);
+        places.push_back(std::to_wstring(count) + L" ) Страна: " + wcountry 
+            + L", Название: " + wname + variotive);
         coords[count] = { lng, lat };
         count++;
     }

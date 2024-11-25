@@ -1,4 +1,4 @@
-  NetworkLab3.MainForm.resources - Embedded, ContainedInManifestFile, 
+  NetworkLab3.Form.resources - Embedded, ContainedInManifestFile, 
 ImageRuntimeVersion: v4.0.30319
 Assembly NetworkLab3, Version=0.0.*, Culture=Инвариантный язык (Инвариантная страна): 
 	hash=SHA1, flags=PublicKey
@@ -14,6 +14,20 @@ Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=
 	hash=None, flags=None
 Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
 	hash=None, flags=None
+Class NetworkLab3.Presenter: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(NetworkLab3.MainForm, PlacesAPI*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    OnButton1Click(basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
+    OnButton2Click(Int32): PrivateScope, Public, HideBySig
 Class NetworkLab3.MainForm: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   :System.Windows.Forms.Form
-    Void .ctor(Places*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(PlacesAPI*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    InitializeComponent(): PrivateScope, Public, HideBySig
+    ShowLocations(vector<std::basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> >\,std::allocator<std::basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> > > >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
+    ShowWeatherAndDescriptions(basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
+Class NetworkLab3.Model: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(PlacesAPI*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    GetLocations(vector<std::basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> >\,std::allocator<std::basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> > > >*, basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> >* IsImplicitlyDereferenced): PrivateScope, Public, HideBySig
+    GetWeatherAndDescriptions(basic_string<wchar_t\,std::char_traits<wchar_t>\,std::allocator<wchar_t> >*, Int32): PrivateScope, Public, HideBySig
